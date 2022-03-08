@@ -1,0 +1,72 @@
+# learners-mockup-data
+This is my solution set for Codecademy's "Learners Mockup Data" Project. 
+
+-- 2.1 What are the Top 25 schools (.edu domains)?
+-- Here, it doesn't matter whether you specify if the email is an .edu domain as all the emails actually end with .edu
+
+SELECT email_domain, COUNT(user_id) 
+FROM users
+GROUP BY email_domain
+ORDER BY COUNT(user_id) DESC
+LIMIT 25
+
+-- 2.2 How many .edu learners are located in New York?
+
+SELECT COUNT(user_id)
+FROM users
+WHERE city = 'New York'
+
+-- 2.3 How many of Codecademy learners are using the mobile app?
+
+SELECT COUNT(user_id)
+FROM users
+WHERE mobile_app = 'mobile-user'
+
+-- 3.0 How many sign up counts are there for each hour?
+-- strftime(format, column) is a function that returns a formatted date. Take note that the column should be in date or date/time format
+-- %Y (year), %m (month), %d (day), %H (hour), %M (minute), %S (seconds)
+-- strftime() is only for SQLite. The equivalent in PostgreSQL is probably EXTRACT 
+
+SELECT strftime('%H',sign_up_at) AS hour,
+       COUNT(user_id) AS count
+FROM users
+GROUP BY hour
+
+-- 4.1 What courses do different schools prefer?
+-- Shows the count of all courses by school, ordering the schools by the total number of courses signed up.
+
+WITH table1 AS(
+
+SELECT email_domain,
+      COUNT(CASE WHEN learn_cpp != '' THEN 1 END) AS cpp,
+      COUNT(CASE WHEN learn_sql != '' THEN 1 END) AS sql,
+      COUNT(CASE WHEN learn_html != '' THEN 1 END) AS html,
+      COUNT(CASE WHEN learn_javascript != '' THEN 1 END) AS javascript, 
+      COUNT(CASE WHEN learn_java != '' THEN 1 END) AS java
+      
+FROM progress 
+INNER JOIN users
+ON progress.user_id = users.user_id
+GROUP BY email_domain
+)
+
+SELECT *, cpp+sql+html+javascript+java AS total
+FROM table1
+ORDER BY total DESC
+
+-- 4.2 and 4.3 What courses are the New Yorkers and Chicago students taking?
+-- You can also use CASE WHEN learn_cpp IN ('started', 'completed') THEN 1 END
+-- For some reason, the NOT NULL key does not work in the Codecademy SQL code editor. This is why '' has to be used to detect empty rows.
+
+SELECT city, 
+      COUNT(CASE WHEN learn_cpp != '' THEN 1 END) AS cpp,
+      COUNT(CASE WHEN learn_sql != '' THEN 1 END) AS sql,
+      COUNT(CASE WHEN learn_html != '' THEN 1 END) AS html,
+      COUNT(CASE WHEN learn_javascript != '' THEN 1 END) AS javascript, 
+      COUNT(CASE WHEN learn_java != '' THEN 1 END) AS java
+
+FROM users 
+INNER JOIN progress 
+  ON users.user_id = progress.user_id
+WHERE city = 'New York' OR city = 'Chicago'
+GROUP BY city
