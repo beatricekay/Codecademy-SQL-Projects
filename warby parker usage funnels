@@ -1,0 +1,35 @@
+-- Usage Funnels with Warby Parker (Practice Project)
+-- Question 2: What is the number of responses for each question?
+SELECT question, COUNT(question) AS count
+FROM survey
+GROUP BY question;
+
+-- Question 3: Which question(s) of the quiz have a lower completion rates?
+SELECT question, (COUNT(question)/CAST(500 AS double)) * 100 AS perc
+FROM survey
+GROUP BY question;
+
+-- Question 4: Create a new table with the attached layout.
+SELECT q.user_id, 
+CASE WHEN h.user_id IS NULL THEN 'False'
+     ELSE 'True' END AS is_home_try_on,
+number_of_pairs, 
+CASE WHEN p.user_id IS NULL THEN 'False'
+     ELSE 'True' END AS is_purchase
+FROM quiz AS q
+LEFT JOIN home_try_on AS h
+ON q.user_id = h.user_id
+LEFT JOIN purchase AS p
+ON q.user_id = p.user_id
+LIMIT 10;
+
+SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+LIMIT 10;
