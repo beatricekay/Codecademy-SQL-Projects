@@ -1,0 +1,103 @@
+- VR Startup Company (Practice Project)
+SELECT * 
+FROM projects;
+
+SELECT * 
+FROM employees
+WHERE position = 'Designer';
+
+-- Question 3: What are the names of employees who have not chosen a project?
+SELECT *
+FROM employees
+WHERE current_project IS NULL;
+
+-- Question 4: What are the names of projects that were not chosen by any employees?
+SELECT project_name
+FROM projects 
+LEFT JOIN employees
+ON projects.project_id = employees.current_project
+WHERE current_project IS NULL;
+
+-- Question 5: What is the name of the project chosen by the most employees?
+SELECT project_name, COUNT(employee_id) AS count
+FROM employees
+LEFT JOIN projects
+ON employees.current_project = projects.project_id
+WHERE project_name IS NOT NULL
+GROUP BY project_name
+ORDER BY count DESC;
+
+-- Question 6: WWhich projects were chosen by multiple employees?
+SELECT project_name, COUNT(employee_id) AS count
+FROM employees
+LEFT JOIN projects
+ON employees.current_project = projects.project_id
+WHERE project_name IS NOT NULL 
+GROUP BY project_name
+HAVING count > 1
+ORDER BY count DESC;
+
+-- Question 7: Each project needs at least 2 developers. How many available project positions are there for developers? Do we have enough developers (who do not have projects) to fill the needed positions? 
+SELECT (COUNT(*) * 2) - 
+(SELECT COUNT(*) FROM employees
+WHERE position = 'Designer' AND current_project IS NOT NULL) AS available_positions
+FROM projects;
+
+SELECT COUNT(*) AS available_developers FROM employees
+WHERE position = 'Designer' AND current_project IS NULL;
+
+-- Bonus Question 9: Which personality is the most common across our employees?
+SELECT personality, COUNT(employee_id) AS count
+FROM employees
+GROUP BY personality
+ORDER BY count DESC;
+
+-- Bonus Question 10: What are the names of projects chosen by employees with the most common personality type?
+-- Most common personality type: ENFJ
+SELECT first_name, last_name, personality, project_name
+FROM employees 
+INNER JOIN projects
+ON employees.current_project = projects.project_id
+WHERE personality = 'ENFJ';
+
+-- Bonus Question 11: Find the personality type most represented by employees with a selected project. What are names of those employees, the personality type, and the names of the project they’ve chosen?
+SELECT first_name, last_name, personality, project_name
+FROM employees
+INNER JOIN projects
+ON employees.current_project = projects.project_id
+WHERE personality = (
+SELECT personality
+FROM employees
+INNER JOIN projects
+ON employees.current_project = projects.project_id
+GROUP BY personality
+ORDER BY COUNT(employee_id) DESC
+LIMIT 1);
+
+-- Bonus Question 12: For each employee, provide their name, personality, the names of any projects they’ve chosen, and the number of incompatible co-workers.
+SELECT first_name, last_name, personality, project_name,
+CASE 
+WHEN personality IN ('INFP', 'ENFP', 'INFJ') THEN 
+(
+  SELECT COUNT(*) FROM employees 
+  WHERE personality IN ('ISFP', 'ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ')
+) 
+WHEN personality = 'ENFJ' THEN 
+(
+  SELECT COUNT(*) FROM employees 
+  WHERE personality IN ('ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ')
+)
+WHEN personality = 'ISFP' THEN
+(
+  SELECT COUNT(*) FROM employees 
+  WHERE personality IN ('INFP', 'ENFP', 'INFJ')
+)
+WHEN personality IN ('ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ') THEN
+(
+  SELECT COUNT(*) FROM employees 
+  WHERE personality IN ('INFP', 'ENFP', 'INFJ', 'ENFJ')
+)
+END AS incompt
+FROM employees
+LEFT JOIN projects
+ON employees.current_project = projects.project_id
