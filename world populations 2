@@ -1,0 +1,48 @@
+-- World Populations SQL Practice 2
+-- Question 3: How many entries in the countries table are from Africa?
+SELECT COUNT(DISTINCT name)
+FROM countries
+WHERE continent = 'Africa';
+
+-- Question 4: What was the total population of the continent of Oceania in 2005?
+SELECT SUM(population)
+FROM countries AS t1
+LEFT JOIN population_years AS t2
+ON t1.id = t2.id
+WHERE continent = 'Oceania' AND year = 2005;
+
+-- Question 5: What is the average population of countries in South America in 2003?
+SELECT name, continent, population
+FROM countries AS t1
+LEFT JOIN population_years AS t2
+ON t1.id = t2.id
+WHERE year = 2003 AND continent = 'South America'; 
+
+-- Question 6: What country had the smallest population in 2007?
+SELECT *
+FROM countries AS t1
+LEFT JOIN population_years AS t2
+ON t1.id = t2.id
+WHERE year = 2007
+ORDER BY population 
+LIMIT 1;
+
+-- Question 7: What is the average population of Poland during the time period covered by this dataset?
+SELECT *
+FROM countries AS t1
+LEFT JOIN population_years AS t2
+ON t1.id = t2.id
+WHERE name = 'Poland';
+
+-- Question 8: How many countries have the word "The" in their name?
+SELECT * 
+FROM countries
+WHERE name LIKE '% The%';
+
+-- Question 9: What was the total population of each continent in 2010?
+SELECT continent, SUM(population)
+FROM countries AS t1
+LEFT JOIN population_years AS t2
+ON t1.id = t2.id
+WHERE year = 2010
+GROUP BY continent;
