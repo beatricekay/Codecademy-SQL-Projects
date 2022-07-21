@@ -1,0 +1,38 @@
+-- Welp (Practice Project)
+SELECT *
+FROM places
+LIMIT 10;
+
+SELECT * 
+FROM reviews
+LIMIT 10;
+
+-- Question 2: If each dollar sign ($) represents $10, how could you find all places that cost $20 or less?
+SELECT *
+FROM places
+WHERE price_point IN ('$', '$$');
+
+-- Question 4: Write a query to do an INNER JOIN on the two tables to show all reviews for restaurants that have at least one review.
+SELECT name, average_rating, username, rating, review_date, note
+FROM places AS t1
+LEFT JOIN reviews AS t2
+ON t1.id = t2.place_id
+WHERE note IS NULL;
+
+-- Question 8: Write a query using the WITH clause to select all the reviews that happened in 2020. JOIN the places to your WITH query to see a log of all reviews from 2020.
+WITH reviews_2020 AS (
+  SELECT *
+  FROM reviews
+  WHERE strftime('%Y', review_date) = '2020'
+)
+
+SELECT * FROM places
+INNER JOIN reviews_2020
+ON places.id = reviews_2020.place_id;
+
+-- Question 9: Write a query that finds the reviewer with the most reviews that are BELOW the average rating for places.
+SELECT username, AVG(rating) FROM reviews
+GROUP BY username
+HAVING AVG(rating) < (SELECT AVG(average_rating) FROM places);
+
+SELECT AVG(average_rating) FROM places
