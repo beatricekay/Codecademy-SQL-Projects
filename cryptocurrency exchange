@@ -1,0 +1,26 @@
+--#1: Total money_in and money_out SUM:
+SELECT SUM(money_in) AS total_money_in FROM transactions;
+
+SELECT SUM(money_out) AS total_money_out FROM transactions;
+
+--#2: How many Bitcoin transactions are there in the table? 
+SELECT currency, COUNT(money_in) AS count
+FROM transactions
+GROUP BY currency
+ORDER BY count;
+-- 21 money_in transactions are of BIT currency 
+
+--#3: What was the largest transaction in the whole table?
+SELECT max(money_in), max(money_out) 
+FROM transactions;
+-- The largest transaction amount was $15,047.00 and was a money_out transaction. 
+
+--#4: What is the average money_in in the table for ETH currency?
+SELECT ROUND(AVG(money_in),2) AS eth_avg
+FROM transactions
+WHERE currency = 'ETH';
+
+--#5: 
+SELECT date, ROUND(AVG(money_in),2) AS avg_money_in, ROUND(AVG(money_out),2) AS avg_money_out
+FROM transactions
+GROUP BY date
