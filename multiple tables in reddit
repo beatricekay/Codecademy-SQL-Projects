@@ -1,0 +1,72 @@
+--#1: What is the primary key for each table? Can you identify any foreign keys?
+-- users primary key: id
+-- posts primary key: id
+-- posts foreign key: user_id, subreddit_id
+-- subreddits primary key: id
+
+--#2: Write a query to count how many different subreddits there are. 
+SELECT DISTINCT name
+FROM subreddits;
+SELECT COUNT(*) AS subreddit_count FROM subreddits;
+
+--#3A: What user has the highest score?
+SELECT id, username, email, max(score) AS max_score
+FROM users;
+
+--#3B: Which post has the highest score? 
+SELECT id, title, max(score) AS max_score
+FROM posts;
+
+--#3C: What are the top 5 subreddits with the highest subscribe_count?
+SELECT name, max(subscriber_count) AS max_sub_count
+FROM subreddits;
+
+--#4: Find out how many post each user has made. Order the data by the number of posts in descending order. 
+SELECT u.id, u.username, COUNT(*) AS post_count
+FROM users AS u
+LEFT JOIN posts AS p
+ON u.id = p.user_id
+GROUP BY u.username
+ORDER BY post_count DESC;
+
+--#5: We only want to see existing posts where users are still active:
+-- Users who do not have username/email are deleted accounts.
+SELECT *
+FROM posts AS p
+INNER JOIN users AS u
+ON p.user_id = u.id
+
+--#6: New posts have been added to Reddit. Add the new posts2 table under the existing posts table to see. 
+SELECT * 
+FROM posts
+UNION
+SELECT *
+FROM posts2;
+
+--#7: Find the subreddits that have the most popular posts with at least a score of 5000.
+WITH popular_posts AS(
+  SELECT * FROM posts
+  WHERE score >= 5000
+)
+
+SELECT s.name, p.title, p.score
+FROM subreddits AS s
+INNER JOIN popular_posts AS p
+ON s.id = p.subreddit_id
+ORDER BY p.score DESC;
+
+--#8: Find out the highest scoring post for each subreddit. 
+SELECT s.name, max(p.score) AS max_score
+FROM posts AS p
+INNER JOIN subreddits AS s
+ON p.subreddit_id = s.id
+GROUP BY s.name
+ORDER BY max_score DESC;
+
+--#9: Write a query to calculate the average score of all the posts for each subreddit. 
+SELECT s.name, ROUND(AVG(p.score))AS avg_posts_score
+FROM subreddits AS s
+INNER JOIN posts AS p
+ON s.id = p.subreddit_id 
+GROUP BY s.name
+ORDER BY avg_posts_score DESC
