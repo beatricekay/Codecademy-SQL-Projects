@@ -1,0 +1,58 @@
+--#1: Look at first 100 rows of table and find out the number of different segments:
+SELECT DISTINCT segment
+FROM subscriptions
+-- Only 2 segments, segment 87 and 30.
+
+--#2: Determine the range of months of data provided. Which months can you calculate churn for?
+SELECT MIN(subscription_start) AS min_date, MAX(subscription_start) AS max_date
+FROM subscriptions
+-- December 2016 to March 2017
+
+--#3: Create a temporary table for the first 3 months of 2017: 
+WITH months AS (
+  SELECT '2017-01-01' AS first_day, 
+         '2017-01-31' AS last_day
+  UNION
+  SELECT '2017-02-01' AS first_day, 
+         '2017-02-28' AS last_day
+  UNION
+  SELECT '2017-03-01' AS first_day, 
+         '2017-03-31' AS last_day
+)
+
+--#4: Create a temporary table cross joining subscriptions and months, making sure to SELECT every column.
+,
+cross_join AS (
+SELECT * FROM subscriptions 
+CROSS JOIN months
+)
+
+--#5: Create a temporary table showing the active and canceled users for both segments.
+, 
+status AS (
+SELECT id, first_day AS month, 
+CASE WHEN segment = 87 AND subscription_start < first_day AND (subscription_end > first_day OR subscription_end IS NULL) THEN 1 ELSE 0 END AS is_active_87, 
+CASE WHEN segment = 30 AND subscription_start < first_day AND (subscription_end > first_day OR subscription_end IS NULL) THEN 1 ELSE 0 END AS is_active_30,
+CASE WHEN segment = 87 AND subscription_end BETWEEN first_day AND last_day THEN 1 ELSE 0 END AS is_canceled_87, 
+CASE WHEN segment = 30 AND subscription_end BETWEEN first_day AND last_day THEN 1 ELSE 0 END AS is_canceled_30
+FROM cross_join
+)
+
+--#6: Create a temporary table to sum up the active and canceled users for both segments. 
+,
+status_aggregate AS (
+SELECT month, SUM(is_active_87) AS sum_active_87,
+SUM(is_active_30) AS sum_active_30,
+SUM(is_canceled_87) AS sum_canceled_87,
+SUM(is_canceled_30) AS sum_canceled_30
+FROM status
+GROUP BY month
+)
+
+--#7: Calculate the churn rate for both segments over the 3 month period. 
+SELECT month, ROUND(100*sum_canceled_87/CAST(sum_active_87 AS double),2) AS churn_87, ROUND(100*sum_canceled_30/CAST(sum_active_30 AS double),2) AS churn_30 
+FROM status_aggregate
+GROUP BY month
+
+--#8: How would you modify this code to support a large number of segments?
+Group by SEGMENTS instead along with month
