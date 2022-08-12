@@ -1,0 +1,51 @@
+--#1: Calculate the total number of companies in the table.
+SELECT COUNT(DISTINCT name) AS no_of_companies FROM startups;
+
+--#2: What is the total value of all the companies? 
+SELECT SUM(valuation) AS total_value
+FROM startups;
+
+--#3: What is the highest amount raised by a startup?
+SELECT MAX(raised) AS max_raised
+FROM startups;
+
+--#4: Edit the query so it returns the maximum amount of money raised during 'Seed stage'.
+SELECT MAX(raised) AS max_raised_seed
+FROM startups 
+WHERE stage = 'Seed';
+
+--#5: What year was the oldest company founded in?
+SELECT name, MIN(founded) AS year
+FROM startups;
+
+--#6: Return the average valuation.
+SELECT AVG(valuation) AS avg_value
+FROM startups;
+
+--#7: Return the average valuation in each category.
+SELECT category, ROUND(AVG(valuation),2) AS avg_value
+FROM startups
+GROUP BY category
+ORDER BY avg_value DESC;
+
+--#8: Return the name of each category and the total number of companies belonging to it.
+SELECT category, COUNT(DISTINCT name) AS count
+FROM startups
+GROUP BY category;
+
+--#9: Filter the results to only include categories that have more than 3 companies in them. 
+SELECT category, COUNT(DISTINCT name) AS count
+FROM startups
+GROUP BY category
+HAVING count > 3;
+
+--#10: What is the average size of each startup in each location?
+SELECT location, AVG(employees) AS size
+FROM startups
+GROUP BY location;
+
+--#11: What is the average size of each startup in each location with average sizes above 500?
+SELECT location, AVG(employees) AS size
+FROM startups
+GROUP BY location
+HAVING size > 500;
