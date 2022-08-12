@@ -1,0 +1,36 @@
+--#1: Combine the trips and riders table using a LEFT JOIN.
+SELECT *
+FROM trips AS t
+LEFT JOIN riders AS r
+ON t.rider_id = r.id;
+
+--#2: Combine the trips and cars table using an INNER JOIN.
+SELECT *
+FROM trips AS t
+INNER JOIN cars AS c
+ON t.car_id = c.id;
+
+--#3: Stacks the riders table on top of the new table named riders2.
+SELECT * FROM riders
+UNION
+SELECT * FROM riders2;
+
+--#4: What is the average cost for a trip? 
+SELECT AVG(cost) AS average
+FROM trips;
+
+--#5: Find all the riders who have used Lyft less than 500 times.
+SELECT *
+FROM riders 
+WHERE total_trips < 500;
+
+--#6: Calculate the number of active cars.
+SELECT COUNT(id) AS active_car_count
+FROM cars
+WHERE status = 'active';
+
+--#7: Write a query that finds the two cars that have the highest trips completed.
+SELECT *
+FROM cars 
+ORDER BY trips_completed DESC
+LIMIT 2
